@@ -249,8 +249,11 @@ mod lib {
 
     #[cfg(feature = "std")]
     pub use std::collections::{HashMap, HashSet};
+
     #[cfg(feature = "std")]
+    #[allow(unused_imports)]
     pub use std::ffi::{OsStr, OsString};
+
     #[cfg(feature = "std")]
     pub use std::hash::{BuildHasher, Hash};
     #[cfg(feature = "std")]

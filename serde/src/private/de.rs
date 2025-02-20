@@ -206,6 +206,7 @@ mod content {
     // This issue is tracking making some of this stuff public:
     // https://github.com/serde-rs/serde/issues/741
 
+    use crate::de::VariantAccess;
     use crate::lib::*;
 
     use crate::actually_private;
@@ -525,12 +526,17 @@ mod content {
             Ok(Content::Map(vec))
         }
 
-        fn visit_enum<V>(self, _visitor: V) -> Result<Self::Value, V::Error>
+        fn visit_enum<V>(self, visitor: V) -> Result<Self::Value, V::Error>
         where
             V: EnumAccess<'de>,
         {
-            Err(de::Error::custom(
-                "untagged and internally tagged enums do not support enum input",
+            let (key, data) = tri!(visitor.variant::<String>());
+            Ok(Content::Map(
+                [(
+                    Content::String(key),
+                    tri!(data.newtype_variant::<Self::Value>()),
+                )]
+                .into(),
             ))
         }
     }
