@@ -496,7 +496,7 @@ mod content {
             Ok(Content::Map(vec))
         }
 
-        fn visit_enum<V>(self, _visitor: V) -> Result<Self::Value, V::Error>
+        fn visit_enum<V>(self, visitor: V) -> Result<Self::Value, V::Error>
         where
             V: EnumAccess<'de>,
         {
