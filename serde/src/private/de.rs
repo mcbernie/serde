@@ -500,9 +500,15 @@ mod content {
         where
             V: EnumAccess<'de>,
         {
-            Err(de::Error::custom(
+            use crate::de::VariantAccess;
+            let (key, data) = tri!(visitor.variant::<String>());
+            Ok(Content::Map(vec![(
+                Content::String(key),
+                tri!(data.newtype_variant::<Self::Value>()),
+            )]))
+            /*Err(de::Error::custom(
                 "untagged and internally tagged enums do not support enum input",
-            ))
+            ))*/
         }
     }
 
