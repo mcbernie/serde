@@ -2062,6 +2062,18 @@ pub trait EnumAccess<'de>: Sized {
     }
 }
 
+/// Variant Hint for VariantAccess
+pub enum VariantHint {
+    /// variant with no values
+    Unit,
+    /// variant with a single value
+    Newtype,
+    /// vuple-like variant with the length of the tuple
+    Tuple(usize),
+    /// struct-like variant. with names of the fields of the struct variant
+    Struct(&'static [&'static str]),
+}
+
 /// `VariantAccess` is a visitor that is created by the `Deserializer` and
 /// passed to the `Deserialize` to deserialize the content of a particular enum
 /// variant.
