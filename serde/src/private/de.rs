@@ -211,7 +211,7 @@ mod content {
 
     use crate::de::{
         self, Deserialize, DeserializeSeed, Deserializer, EnumAccess, Expected, IgnoredAny,
-        MapAccess, SeqAccess, Unexpected, Visitor,
+        MapAccess, SeqAccess, Unexpected, VariantAccess, Visitor,
     };
     use serde_core::__private::size_hint;
     pub use serde_core::__private::Content;
@@ -500,15 +500,17 @@ mod content {
         where
             V: EnumAccess<'de>,
         {
-            use crate::de::VariantAccess;
-            let (key, data) = tri!(visitor.variant::<String>());
-            Ok(Content::Map(vec![(
-                Content::String(key),
-                tri!(data.newtype_variant::<Self::Value>()),
-            )]))
-            /*Err(de::Error::custom(
+            let (key, data) = tri!(visitor.variant::<Content>());
+            let variant_hint = tri!(data.hint().ok_or(de::Error::custom(
                 "untagged and internally tagged enums do not support enum input",
-            ))*/
+            )));
+            let data = match variant_hint {
+                de::VariantHint::Unit => Content::Unit,
+                de::VariantHint::Newtype => tri!(data.newtype_variant()),
+                de::VariantHint::Tuple(len) => tri!(data.tuple_variant(len, self)),
+                de::VariantHint::Struct(fields) => tri!(data.struct_variant(fields, self)),
+            };
+            Ok(Content::Map([(key, data)].into()))
         }
     }
 
